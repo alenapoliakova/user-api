@@ -1,0 +1,254 @@
+openapi: 3.0.3
+info:
+  title: user_service_api
+  description: API для управления пользователями
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/users
+    description: production_server
+
+security:
+  - bearer_auth: []
+
+paths:
+  /users/auth:
+    post:
+      summary: авторизация пользователя
+      operationId: login_user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: успешная авторизация
+          headers:
+            Set-Cookie:
+              description: устанавливает http-only cookie с refresh-токеном
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+        '401':
+          description: неверные учетные данные
+
+  /users/refresh:
+    post:
+      summary: обновление access-токена
+      operationId: refresh_token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        '200':
+          description: новый access-токен
+          headers:
+            Set-Cookie:
+              description: обновляет http-only cookie с новым refresh-токеном
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+        '401':
+          description: refresh-токен недействителен
+
+  /users/logout:
+    post:
+      summary: выход из системы
+      operationId: logout_user
+      security:
+        - bearer_auth: []
+      responses:
+        '204':
+          description: пользователь успешно вышел
+          headers:
+            Set-Cookie:
+              description: удаляет refresh-токен
+              schema:
+                type: string
+        '200':
+          description: успешный выход, включая удаление cookies с refresh-токеном
+
+  /users/:
+    get:
+      summary: получить список пользователей
+      operationId: get_users
+      security:
+        - bearer_auth: []
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [teacher, student, headteacher]
+          description: фильтрация по роли
+      responses:
+        '200':
+          description: список пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/user'
+    post:
+      summary: добавить пользователя
+      operationId: create_user
+      security:
+        - bearer_auth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_create'
+      responses:
+        '201':
+          description: пользователь создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+
+  /users/{id}:
+    get:
+      summary: получить информацию о пользователе
+      operationId: get_user_by_id
+      security:
+        - bearer_auth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: данные пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        '404':
+          description: пользователь не найден
+    put:
+      summary: редактировать пользователя
+      operationId: update_user
+      security:
+        - bearer_auth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_update'
+      responses:
+        '200':
+          description: обновленный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+    delete:
+      summary: удалить пользователя
+      operationId: delete_user
+      security:
+        - bearer_auth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: пользователь удален
+        '404':
+          description: пользователь не найден
+
+components:
+  securitySchemes:
+    bearer_auth:
+      type: http
+      scheme: bearer
+      bearerFormat: jwt
+  schemas:
+    user:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        user_type:
+          type: string
+          enum: [teacher, student, headteacher]
+    user_create:
+      type: object
+      required: [name, email, phone, password, user_type]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        password:
+          type: string
+        user_type:
+          type: string
+          enum: [teacher, student, headteacher]
+    user_update:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        user_type:
+          type: string
+          enum: [teacher, student, headteacher]

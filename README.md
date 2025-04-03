@@ -1,19 +1,64 @@
-# user-api
-A lightweight service for user management, authentication (JWT), and role-based access control. Built with Python, FastAPI, and Kafka integration.
-### Первичный запуск базы данных
-1. Склонировать репозиторий, зайти в папку с docker-compose.yml
+# Users API
 
-	`git clone https://github.com/alenapoliakova/user-api.git`
+API сервис для управления пользователями, построенный на FastAPI.
 
-2. Запустить контейнер с PostgreSQL
+## Требования
 
-	`docker-compose up -d`
-3. Проверить, что БД работает
+- Docker
+- Docker Compose
+- Python 3.12 (для локальной разработки)
 
-	`docker ps`
+## Запуск проекта
 
-4. Инициализировать базу данных (только при первом запуске)
+1. Клонируйте репозиторий:
+```bash
+git clone https://github.com/alenapoliakova/user-api.git
+cd users-api
+```
 
-	`docker exec -i postgresql-db-1 psql -U postgres -f dump.sql`
-    
-В дальнейшем можно включать/выключать контейнер `docker-compose up -d`/`docker-compose down`. Данные будут храниться в папке `pgdata`, которая создается при запуске контейнера.
+2. Запустите контейнеры:
+```bash
+docker-compose up --build
+```
+
+Сервис будет доступен по адресу: http://localhost:8000
+
+### Структура проекта
+
+```
+users-api/
+├── app/
+│   ├── api/              # API эндпоинты
+│   ├── core/             # Основные настройки
+│   ├── db/               # Работа с базой данных
+│   ├── models/           # SQLAlchemy модели
+│   ├── schemas/          # Pydantic схемы
+│   └── main.py           # Точка входа
+├── tests/                # Тесты
+├── docker-compose.yml    # Конфигурация Docker
+├── Dockerfile           # Конфигурация контейнера
+└── requirements.txt     # Зависимости
+```
+
+### База данных
+
+- PostgreSQL 16
+- Автоматическое создание таблиц при запуске
+
+### API Документация
+
+После запуска сервиса доступны:
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+## CI/CD
+
+Проект использует GitHub Actions для:
+- Запуска тестов
+- Проверки типов
+- Линтинга
+- Форматирования кода
+
+## Лицензия
+
+MIT

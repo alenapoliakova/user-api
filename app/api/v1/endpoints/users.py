@@ -94,3 +94,4 @@ async def delete_user(
     # Delete the user
     await db.delete(existing_user)
     await db.commit()
+    

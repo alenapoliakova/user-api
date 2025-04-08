@@ -5,7 +5,7 @@ import bcrypt
 
 from app.db.base import get_db
 from app.db.models import User
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
 
 router = APIRouter()
 

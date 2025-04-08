@@ -16,4 +16,13 @@ class UserResponse(UserBase):
     id: UUID
 
     class Config:
-        from_attributes = True 
+        from_attributes = True
+
+class UserUpdate:
+    name: str | None = Field(..., max_length=64)
+    surname: str | None = Field(..., max_length=64)
+    patronymic: str | None = Field(None, max_length=64)
+    type: constr(pattern="^(teacher|student|headteacher)$") | None
+    class_name: str | None = Field(None, max_length=8)
+    email: EmailStr | None
+    password: str | None = Field(..., min_length=8)

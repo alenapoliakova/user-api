@@ -132,6 +132,7 @@ async def delete_user(
             detail=f"Error when deleting a user: {str(e)}"
         )
 
+
 @router.patch("/{email}", response_model=UserResponse)
 async def update_user_partial(
     email: str,
@@ -143,41 +144,48 @@ async def update_user_partial(
         select(User).where(User.email == email)
     )
     existing_user = result.scalar_one_or_none()
-    
+
     if existing_user is None:
         raise HTTPException(
             status_code=404,
             detail="User with this email does not exists"
         )
 
-    for field, value in user.dict(exclude_unset=True, exclude={"email", "password"}).items():
-        setattr(user, field, value)
+    # Get update data, excluding unset fields
+    update_data = user.dict(exclude_unset=True)
 
-    if user.email:
-        # Check if user with same email exists
+    # Handle email update separately
+    if "email" in update_data:
+        # Check if new email is already taken
         result = await db.execute(
-            select(User).where(User.email == user.email)
+            select(User).where(User.email == update_data["email"])
         )
-        existing_user = result.scalar_one_or_none()
-        if existing_user:
+        if result.scalar_one_or_none():
             raise HTTPException(
                 status_code=400,
                 detail="User with new email already exists"
             )
-        existing_user.email = user.email
+        existing_user.email = update_data["email"]
+        del update_data["email"]
 
-    if user.password:
+    # Handle password update separately
+    if "password" in update_data:
         # Hash the password
         password_hash = bcrypt.hashpw(
-            user.password.encode('utf-8'),
+            update_data["password"].encode('utf-8'),
             bcrypt.gensalt()
         ).decode('utf-8')
         existing_user.password_hash = password_hash
-    
+        del update_data["password"]
+
+    # Update all other fields
+    for field, value in update_data.items():
+        setattr(existing_user, field, value)
+
     db.add(existing_user)
     await db.commit()
     await db.refresh(existing_user)
-    
+
     return existing_user
 
 
@@ -187,42 +195,39 @@ async def update_user(
     user: UserCreate,
     db: AsyncSession = Depends(get_db)
 ):
-    # Check if user with same email exists
+    # Get existing user
     result = await db.execute(
         select(User).where(User.email == email)
     )
     existing_user = result.scalar_one_or_none()
-    
+
     if existing_user is None:
         raise HTTPException(
             status_code=404,
             detail="User with this email does not exists"
         )
 
-    for field, value in user.dict(exclude_unset=True, exclude={"email", "password"}).items():
-        setattr(user, field, value)
-
-    # Check if user with same email exists
-    result = await db.execute(
-        select(User).where(User.email == user.email)
-    )
-    existing_user = result.scalar_one_or_none()
-    if existing_user:
-        raise HTTPException(
-            status_code=400,
-            detail="User with new email already exists"
+    # Check if new email is already taken by another user
+    if user.email != email:
+        result = await db.execute(
+            select(User).where(User.email == user.email)
         )
-    existing_user.email = user.email
+        if result.scalar_one_or_none():
+            raise HTTPException(
+                status_code=400,
+                detail="User with new email already exists"
+            )
 
-    # Hash the password
-    password_hash = bcrypt.hashpw(
+    # Update user data
+    for field, value in user.dict(exclude={"password"}).items():
+        setattr(existing_user, field, value)
+
+    # Update password hash separately
+    existing_user.password_hash = bcrypt.hashpw(
         user.password.encode('utf-8'),
         bcrypt.gensalt()
     ).decode('utf-8')
-    existing_user.password_hash = password_hash
-    
-    db.add(existing_user)
+
     await db.commit()
     await db.refresh(existing_user)
-    
     return existing_user

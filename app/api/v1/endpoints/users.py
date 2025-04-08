@@ -134,7 +134,7 @@ async def delete_user(
 
 @router.patch("/{email}", response_model=UserResponse)
 async def update_user_partial(
-    email: str
+    email: str,
     user: UserUpdate,
     db: AsyncSession = Depends(get_db)
 ):
@@ -183,7 +183,7 @@ async def update_user_partial(
 
 @router.put("/{email}", response_model=UserResponse)
 async def update_user(
-    email: str
+    email: str,
     user: UserCreate,
     db: AsyncSession = Depends(get_db)
 ):

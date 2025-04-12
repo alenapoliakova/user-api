@@ -42,6 +42,7 @@ async def create_user(
         type=user.type,
         class_name=user.class_name,
         email=user.email
+        subject=user.subject
     )
 
     db.add(db_user)

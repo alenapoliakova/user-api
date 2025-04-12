@@ -9,6 +9,7 @@ class UserBase(BaseModel):
     type: constr(pattern="^(teacher|student|headteacher)$")
     class_name: str | None = Field(None, max_length=8)
     email: EmailStr
+    subject: str | None = Field(None, max_length=64)
 
 
 class UserCreate(UserBase):
@@ -30,3 +31,5 @@ class UserUpdate(BaseModel):
     class_name: str | None = Field(None, max_length=8)
     email: EmailStr | None = None
     password: str | None = Field(None, min_length=8)
+    subject: str | None = Field(None, max_length=64)
+

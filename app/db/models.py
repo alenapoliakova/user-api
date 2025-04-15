@@ -14,4 +14,5 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     type = Column(String(16), nullable=False)
     class_name = Column(String(8), nullable=True)
-    email = Column(String(255), nullable=False, unique=True) 
+    email = Column(String(255), nullable=False, unique=True)
+    subject = Column(String(64), nullable=True)

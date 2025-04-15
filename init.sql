@@ -8,6 +8,7 @@ CREATE TABLE public.users (
     type character varying(16) NOT NULL,
     class_name character varying(8),
     email character varying(255) NOT NULL,
+    subject character varying(64),
     CONSTRAINT users_pkey PRIMARY KEY (id),
     CONSTRAINT valid_user_type CHECK (type IN ('teacher', 'student', 'headteacher')),
     CONSTRAINT users_email_key UNIQUE (email)

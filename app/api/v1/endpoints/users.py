@@ -41,7 +41,8 @@ async def create_user(
         password_hash=password_hash,
         type=user.type,
         class_name=user.class_name,
-        email=user.email
+        email=user.email,
+        subject=user.subject
     )
 
     db.add(db_user)

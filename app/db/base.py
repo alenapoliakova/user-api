@@ -22,7 +22,7 @@ Base = declarative_base()
 
 async def get_db():
     """
-    Dependency for getting async database session.
+    Зависимость для получения асинхронной сессии базы данных.
     """
     async with AsyncSessionLocal() as session:
         try:

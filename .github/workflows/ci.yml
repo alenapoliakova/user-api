@@ -20,30 +20,14 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        make install
 
     - name: Run linters
       run: |
-        # mypy .
-        # pylint app tests
-        ruff check .
+        make lint
 
   test:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test_user_api
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
     - uses: actions/checkout@v3
@@ -56,16 +40,10 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        make install
 
     - name: Run tests
       env:
         PYTHONPATH: ${{ github.workspace }}
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_user_api
-        API_V1_STR: /api/v1
-        PROJECT_NAME: User API
-        SECRET_KEY: test_secret_key
-        ACCESS_TOKEN_EXPIRE_MINUTES: 30
       run: |
-        echo "Tests skipped..."
-#        pytest
+        make test

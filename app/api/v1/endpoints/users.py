@@ -82,14 +82,7 @@ async def get_user_by_id(
             detail="User not found"
         )
     # Return user
-    try:
-        return existing_user
-    except Exception as e:
-        await db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error when finding a user: {str(e)}"
-        )
+    return existing_user
 
 
 @router.delete(

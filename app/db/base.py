@@ -21,6 +21,9 @@ Base = declarative_base()
 
 
 async def get_db():
+    """
+    Dependency for getting async database session.
+    """
     async with AsyncSessionLocal() as session:
         try:
             yield session

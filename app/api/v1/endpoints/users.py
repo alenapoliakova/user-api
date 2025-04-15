@@ -1,7 +1,7 @@
+import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-import bcrypt
 
 from app.db.base import get_db
 from app.db.models import User

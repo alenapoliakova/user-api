@@ -1,0 +1,15 @@
+[MASTER]
+ignore=CVS
+
+[MESSAGES CONTROL]
+disable=
+    C0114,  # missing-module-docstring
+    C0115,  # missing-class-docstring
+    C0116,  # missing-function-docstring
+    R0903,  # too-few-public-methods
+    E0401,  # import-error
+    E1123,  # unexpected-keyword-arg
+    W0707   # raise-missing-from
+
+[FORMAT]
+max-line-length=120 

@@ -1,5 +1,6 @@
 from uuid import UUID
-from pydantic import BaseModel, Field, constr, EmailStr, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, constr
 
 
 class UserBase(BaseModel):

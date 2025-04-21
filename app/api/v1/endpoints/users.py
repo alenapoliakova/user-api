@@ -2,7 +2,7 @@ from typing import List
 
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.base import get_db
@@ -170,7 +170,7 @@ async def delete_user(
 
 @router.get("/user_filter", response_model=List[UserResponse])
 async def get_users(
-    filter: UserFilter,
+    user_filter: UserFilter,
     db: AsyncSession = Depends(get_db)
 ):
     filter_data = filter.dict(exclude_unset=True)

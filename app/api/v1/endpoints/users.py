@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.base import get_db
 from app.db.models import User
-from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.schemas.user import UserCreate, UserResponse, UserUpdate, UserFilter
 
 router = APIRouter()
 
@@ -164,3 +164,14 @@ async def delete_user(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error deleting user: {str(e)}"
         )
+
+
+@router.get("/filter", response_model=List[UserResponse])
+async def get_users(
+    filter: UserFilter,
+    db: AsyncSession = Depends(get_db)
+):
+    filter_data = filter.dict(exclude_unset=True)
+    filters = [key == value for key, value in filter_data]
+    users = await db.execute(select(User).where(and_(*filters)))
+    return users

@@ -2,6 +2,7 @@ import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
 
 from app.db.base import get_db
 from app.db.models import User
@@ -173,5 +174,6 @@ async def get_users(
 ):
     filter_data = filter.dict(exclude_unset=True)
     filters = [key == value for key, value in filter_data]
-    users = await db.execute(select(User).where(and_(*filters)))
+    result = await db.execute(select(User).where(and_(*filters)))
+    users = result.scalars().all()
     return users

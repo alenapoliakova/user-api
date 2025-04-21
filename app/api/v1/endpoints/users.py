@@ -173,7 +173,7 @@ async def get_users(
     user_filter: UserFilter,
     db: AsyncSession = Depends(get_db)
 ):
-    filter_data = filter.dict(exclude_unset=True)
+    filter_data = user_filter.dict(exclude_unset=True)
     filters = [key == value for key, value in filter_data]
     result = await db.execute(select(User).filter(and_(*filters)))
     users = result.scalars().all()

@@ -12,7 +12,7 @@ def user_data() -> dict[str, str]:
         "patronymic": "Иванович",
         "type": "student",
         "class_name": "10A",
-        "email": "ivanov@example.com",
+        "login": "ivanov_i",
         "password": "supersecret",
         "subject": None
     }
@@ -29,7 +29,7 @@ def updated_user_data() -> dict[str, str | None]:
         "patronymic": "Петрович",
         "type": "teacher",
         "class_name": None,
-        "email": "petrov@example.com",
+        "login": "petrov_p",
         "password": "newsecret",
         "subject": "Физика"
     }

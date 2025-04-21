@@ -9,7 +9,6 @@ from app.db.base import get_db
 from app.db.models import User
 from app.schemas.user import UserCreate, UserFilter, UserResponse, UserUpdate
 
-
 router = APIRouter()
 
 
@@ -176,6 +175,6 @@ async def get_users(
 ):
     filter_data = filter.dict(exclude_unset=True)
     filters = [key == value for key, value in filter_data]
-    result = await db.execute(select(User).where(and_(*filters)))
+    result = await db.execute(select(User).filter(and_(*filters)))
     users = result.scalars().all()
     return users

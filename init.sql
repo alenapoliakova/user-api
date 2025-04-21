@@ -11,5 +11,5 @@ CREATE TABLE public.users (
     subject character varying(64),
     CONSTRAINT users_pkey PRIMARY KEY (id),
     CONSTRAINT valid_user_type CHECK (type IN ('teacher', 'student', 'headteacher')),
-    CONSTRAINT users_email_key UNIQUE (email)
+    CONSTRAINT users_login_key UNIQUE (login)
 ); 

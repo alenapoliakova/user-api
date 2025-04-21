@@ -22,11 +22,10 @@ paths:
           application/json:
             schema:
               type: object
-              required: [email, password]
+              required: [login, password]
               properties:
-                email:
+                login:
                   type: string
-                  format: email
                 password:
                   type: string
       responses:
@@ -215,9 +214,8 @@ components:
           format: uuid
         name:
           type: string
-        email:
+        login:
           type: string
-          format: email
         phone:
           type: string
         user_type:
@@ -225,13 +223,12 @@ components:
           enum: [teacher, student, headteacher]
     user_create:
       type: object
-      required: [name, email, phone, password, user_type]
+      required: [name, login, phone, password, user_type]
       properties:
         name:
           type: string
-        email:
+        login:
           type: string
-          format: email
         phone:
           type: string
         password:
@@ -244,9 +241,8 @@ components:
       properties:
         name:
           type: string
-        email:
+        login:
           type: string
-          format: email
         phone:
           type: string
         user_type:

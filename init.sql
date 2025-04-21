@@ -7,7 +7,7 @@ CREATE TABLE public.users (
     password_hash character varying(255) NOT NULL,
     type character varying(16) NOT NULL,
     class_name character varying(8),
-    email character varying(255) NOT NULL,
+    login character varying(255) NOT NULL,
     subject character varying(64),
     CONSTRAINT users_pkey PRIMARY KEY (id),
     CONSTRAINT valid_user_type CHECK (type IN ('teacher', 'student', 'headteacher')),

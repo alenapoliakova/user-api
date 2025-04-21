@@ -10,18 +10,18 @@ from app.schemas.user import UserCreate, UserResponse, UserUpdate
 router = APIRouter()
 
 
-async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
-    """Получить пользователя по email."""
-    result = await db.execute(select(User).where(User.email == email))
+async def get_user_by_login(db: AsyncSession, login: str) -> User | None:
+    """Получить пользователя по login."""
+    result = await db.execute(select(User).where(User.login == login))
     return result.scalar_one_or_none()
 
 
-async def check_email_availability(db: AsyncSession, email: str) -> None:
-    """Проверить доступность email."""
-    if await get_user_by_email(db, email):
+async def check_login_availability(db: AsyncSession, login: str) -> None:
+    """Проверить доступность login."""
+    if await get_user_by_login(db, login):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this email already exists"
+            detail="User with this login already exists"
         )
 
 
@@ -36,7 +36,7 @@ async def create_user(
     db: AsyncSession = Depends(get_db)
 ):
     """Создать нового пользователя."""
-    await check_email_availability(db, user.email)
+    await check_login_availability(db, user.login)
 
     user_data = user.dict(exclude={"password"})
     user_data["password_hash"] = hash_password(user.password)
@@ -56,13 +56,13 @@ async def create_user(
         )
 
 
-@router.get("/{email}", response_model=UserResponse)
+@router.get("/{login}", response_model=UserResponse)
 async def get_user(
-    email: str,
+    login: str,
     db: AsyncSession = Depends(get_db)
 ):
-    """Получить пользователя по email."""
-    user = await get_user_by_email(db, email)
+    """Получить пользователя по login."""
+    user = await get_user_by_login(db, login)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -71,22 +71,22 @@ async def get_user(
     return user
 
 
-@router.put("/{email}", response_model=UserResponse)
+@router.put("/{login}", response_model=UserResponse)
 async def update_user(
-    email: str,
+    login: str,
     user: UserCreate,
     db: AsyncSession = Depends(get_db)
 ):
     """Полностью обновить данные пользователя."""
-    existing_user = await get_user_by_email(db, email)
+    existing_user = await get_user_by_login(db, login)
     if not existing_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
 
-    if user.email != email:
-        await check_email_availability(db, user.email)
+    if user.login != login:
+        await check_login_availability(db, user.login)
 
     for field, value in user.dict(exclude={"password"}).items():
         setattr(existing_user, field, value)
@@ -105,14 +105,14 @@ async def update_user(
         )
 
 
-@router.patch("/{email}", response_model=UserResponse)
+@router.patch("/{login}", response_model=UserResponse)
 async def update_user_partial(
-    email: str,
+    login: str,
     user: UserUpdate,
     db: AsyncSession = Depends(get_db)
 ):
     """Частично обновить данные пользователя."""
-    existing_user = await get_user_by_email(db, email)
+    existing_user = await get_user_by_login(db, login)
     if not existing_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -121,8 +121,8 @@ async def update_user_partial(
 
     update_data = user.dict(exclude_unset=True)
 
-    if "email" in update_data and update_data["email"] != email:
-        await check_email_availability(db, update_data["email"])
+    if "login" in update_data and update_data["login"] != login:
+        await check_login_availability(db, update_data["login"])
 
     if "password" in update_data:
         update_data["password_hash"] = hash_password(update_data.pop("password"))
@@ -142,13 +142,13 @@ async def update_user_partial(
         )
 
 
-@router.delete("/{email}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{login}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
-    email: str,
+    login: str,
     db: AsyncSession = Depends(get_db)
 ):
     """Удалить пользователя."""
-    user = await get_user_by_email(db, email)
+    user = await get_user_by_login(db, login)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

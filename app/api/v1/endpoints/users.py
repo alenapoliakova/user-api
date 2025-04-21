@@ -1,8 +1,8 @@
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
 
 from app.db.base import get_db
 from app.db.models import User

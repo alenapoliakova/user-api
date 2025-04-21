@@ -7,7 +7,7 @@ class UserBase(BaseModel):
     patronymic: str | None = Field(None, max_length=64)
     type: constr(pattern="^(teacher|student|headteacher)$")
     class_name: str | None = Field(None, max_length=8)
-    email: EmailStr
+    login: EmailStr
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=8)

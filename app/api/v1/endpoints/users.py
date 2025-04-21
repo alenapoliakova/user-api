@@ -15,16 +15,16 @@ async def create_user(
         user: UserCreate,
         db: AsyncSession = Depends(get_db)
 ):
-    # Check if user with same email exists
+    # Check if user with same login exists
     result = await db.execute(
-        select(User).where(User.email == user.email)
+        select(User).where(User.login == user.login)
     )
     existing_user = result.scalar_one_or_none()
 
     if existing_user:
         raise HTTPException(
             status_code=400,
-            detail="User with this email already exists"
+            detail="User with this login already exists"
         )
 
     # Hash the password
@@ -41,7 +41,7 @@ async def create_user(
         password_hash=password_hash,
         type=user.type,
         class_name=user.class_name,
-        email=user.email
+        login=user.login
     )
 
     db.add(db_user)

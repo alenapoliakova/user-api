@@ -1,5 +1,3 @@
-from typing import List
-
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import and_, select
@@ -168,7 +166,7 @@ async def delete_user(
         )
 
 
-@router.get("/user_filter", response_model=List[UserResponse])
+@router.get("/user_filter", response_model=list[UserResponse])
 async def get_users(
     user_filter: UserFilter,
     db: AsyncSession = Depends(get_db)

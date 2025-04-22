@@ -145,7 +145,7 @@ async def test_get_users(
         data = create_response.json()
 
     # Получаем пользователей
-    response = await async_client.get(f"/api/v1/users/user_filter") # # # # #
+    response = await async_client.get(f"/api/v1/users/user_filter", json=user_filter)
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     for data_user in data:

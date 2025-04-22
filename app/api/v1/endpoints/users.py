@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.base import get_db
 from app.db.models import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from uuid import UUID
+
 
 router = APIRouter()
 
@@ -15,6 +17,10 @@ async def get_user_by_login(db: AsyncSession, login: str) -> User | None:
     result = await db.execute(select(User).where(User.login == login))
     return result.scalar_one_or_none()
 
+async def get_user_by_id(db: AsyncSession, user_id: UUID) -> User | None:
+    """Получить пользователя по user_id."""
+    result = await db.execute(select(User).where(User.id == user_id))
+    return result.scalar_one_or_none()
 
 async def check_login_availability(db: AsyncSession, login: str) -> None:
     """Проверить доступность login."""
@@ -56,13 +62,13 @@ async def create_user(
         )
 
 
-@router.get("/{login}", response_model=UserResponse)
+@router.get("/{user_id}", response_model=UserResponse)
 async def get_user(
-    login: str,
+    user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
-    """Получить пользователя по login."""
-    user = await get_user_by_login(db, login)
+    """Получить пользователя по id."""
+    user = await get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -71,21 +77,21 @@ async def get_user(
     return user
 
 
-@router.put("/{login}", response_model=UserResponse)
+@router.put("/{user_id}", response_model=UserResponse)
 async def update_user(
-    login: str,
+    user_id: UUID,
     user: UserCreate,
     db: AsyncSession = Depends(get_db)
 ):
     """Полностью обновить данные пользователя."""
-    existing_user = await get_user_by_login(db, login)
+    existing_user = await get_user_by_id(db, user_id)
     if not existing_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
 
-    if user.login != login:
+    if user.login != existing_user.login:
         await check_login_availability(db, user.login)
 
     for field, value in user.dict(exclude={"password"}).items():
@@ -105,14 +111,14 @@ async def update_user(
         )
 
 
-@router.patch("/{login}", response_model=UserResponse)
+@router.patch("/{user_id}", response_model=UserResponse)
 async def update_user_partial(
-    login: str,
+    user_id: UUID,
     user: UserUpdate,
     db: AsyncSession = Depends(get_db)
 ):
     """Частично обновить данные пользователя."""
-    existing_user = await get_user_by_login(db, login)
+    existing_user = await get_user_by_id(db, user_id)
     if not existing_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -121,7 +127,7 @@ async def update_user_partial(
 
     update_data = user.dict(exclude_unset=True)
 
-    if "login" in update_data and update_data["login"] != login:
+    if "login" in update_data and update_data["login"] != user.login:
         await check_login_availability(db, update_data["login"])
 
     if "password" in update_data:
@@ -142,13 +148,13 @@ async def update_user_partial(
         )
 
 
-@router.delete("/{login}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
-    login: str,
+    user_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
     """Удалить пользователя."""
-    user = await get_user_by_login(db, login)
+    user = await get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

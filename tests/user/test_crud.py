@@ -2,6 +2,7 @@ import pytest
 from fastapi import status
 from httpx import AsyncClient
 
+
 pytestmark = pytest.mark.asyncio
 
 @pytest.mark.asyncio
@@ -23,13 +24,15 @@ async def test_get_user(
     async_client: AsyncClient,
     user_data: dict[str, str]
 ) -> None:
-    """Тест получения пользователя по login."""
+    """Тест получения пользователя по id."""
     # Создаем пользователя
     create_response = await async_client.post("/api/v1/users", json=user_data)
     assert create_response.status_code == status.HTTP_201_CREATED
-    
+    data = create_response.json()
+    user_id = data["id"]
+
     # Получаем пользователя
-    response = await async_client.get(f"/api/v1/users/{user_data['login']}")
+    response = await async_client.get(f"/api/v1/users/{user_id}")
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     assert data["login"] == user_data["login"]
@@ -47,10 +50,12 @@ async def test_update_user(
     # Создаем пользователя
     create_response = await async_client.post("/api/v1/users", json=user_data)
     assert create_response.status_code == status.HTTP_201_CREATED
+    data = create_response.json()
+    user_id = data["id"]
     
     # Обновляем пользователя
     response = await async_client.put(
-        f"/api/v1/users/{user_data['login']}", 
+        f"/api/v1/users/{user_id}",
         json=updated_user_data
     )
     assert response.status_code == status.HTTP_200_OK
@@ -71,10 +76,12 @@ async def test_partial_update_user(
     # Создаем пользователя
     create_response = await async_client.post("/api/v1/users", json=user_data)
     assert create_response.status_code == status.HTTP_201_CREATED
-    
+    data = create_response.json()
+    user_id = data["id"]
+
     # Частично обновляем пользователя
     response = await async_client.patch(
-        f"/api/v1/users/{user_data['login']}", 
+        f"/api/v1/users/{user_id}",
         json=partial_update_data
     )
     assert response.status_code == status.HTTP_200_OK
@@ -95,9 +102,11 @@ async def test_delete_user(
     # Создаем пользователя
     create_response = await async_client.post("/api/v1/users", json=user_data)
     assert create_response.status_code == status.HTTP_201_CREATED
+    data = create_response.json()
+    user_id = data["id"]
 
     # Удаляем пользователя
-    response = await async_client.delete(f"/api/v1/users/{user_data['login']}")
+    response = await async_client.delete(f"/api/v1/users/{user_id}")
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
 
@@ -110,11 +119,13 @@ async def test_get_deleted_user(
     # Создаем пользователя
     create_response = await async_client.post("/api/v1/users", json=user_data)
     assert create_response.status_code == status.HTTP_201_CREATED
+    data = create_response.json()
+    user_id = data["id"]
 
     # Удаляем пользователя
-    delete_response = await async_client.delete(f"/api/v1/users/{user_data['login']}")
+    delete_response = await async_client.delete(f"/api/v1/users/{user_id}")
     assert delete_response.status_code == status.HTTP_204_NO_CONTENT
 
     # Пытаемся получить удаленного пользователя
-    response = await async_client.get(f"/api/v1/users/{user_data['login']}")
+    response = await async_client.get(f"/api/v1/users/{user_id}")
     assert response.status_code == status.HTTP_404_NOT_FOUND 

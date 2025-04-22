@@ -149,7 +149,8 @@ async def test_get_users(
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     for data_user in data:
-        for key, val in user_filter.items() if val:
-            assert data_user["login"] == user_filter["login"]
+        for key, val in user_filter.items():
+            if val is not None:
+                assert data_user[key] == user_filter[key]
         assert "password" not in data_user
         assert "password_hash" not in data_user

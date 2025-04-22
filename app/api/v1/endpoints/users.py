@@ -1,3 +1,5 @@
+from uuid import UUID
+
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
@@ -6,8 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.base import get_db
 from app.db.models import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
-from uuid import UUID
-
 
 router = APIRouter()
 
@@ -17,30 +17,29 @@ async def get_user_by_login(db: AsyncSession, login: str) -> User | None:
     result = await db.execute(select(User).where(User.login == login))
     return result.scalar_one_or_none()
 
+
 async def get_user_by_id(db: AsyncSession, user_id: UUID) -> User | None:
     """Получить пользователя по user_id."""
     result = await db.execute(select(User).where(User.id == user_id))
     return result.scalar_one_or_none()
+
 
 async def check_login_availability(db: AsyncSession, login: str) -> None:
     """Проверить доступность login."""
     if await get_user_by_login(db, login):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this login already exists"
+            detail="User with this login already exists",
         )
 
 
 def hash_password(password: str) -> str:
     """Хешировать пароль."""
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 @router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def create_user(
-    user: UserCreate,
-    db: AsyncSession = Depends(get_db)
-):
+async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     """Создать нового пользователя."""
     await check_login_availability(db, user.login)
 
@@ -58,37 +57,30 @@ async def create_user(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error creating user: {str(e)}"
+            detail=f"Error creating user: {str(e)}",
         )
 
 
 @router.get("/{user_id}", response_model=UserResponse)
-async def get_user(
-    user_id: UUID,
-    db: AsyncSession = Depends(get_db)
-):
+async def get_user(user_id: UUID, db: AsyncSession = Depends(get_db)):
     """Получить пользователя по id."""
     user = await get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
     return user
 
 
 @router.put("/{user_id}", response_model=UserResponse)
 async def update_user(
-    user_id: UUID,
-    user: UserCreate,
-    db: AsyncSession = Depends(get_db)
+    user_id: UUID, user: UserCreate, db: AsyncSession = Depends(get_db)
 ):
     """Полностью обновить данные пользователя."""
     existing_user = await get_user_by_id(db, user_id)
     if not existing_user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
     if user.login != existing_user.login:
@@ -107,22 +99,19 @@ async def update_user(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error updating user: {str(e)}"
+            detail=f"Error updating user: {str(e)}",
         )
 
 
 @router.patch("/{user_id}", response_model=UserResponse)
 async def update_user_partial(
-    user_id: UUID,
-    user: UserUpdate,
-    db: AsyncSession = Depends(get_db)
+    user_id: UUID, user: UserUpdate, db: AsyncSession = Depends(get_db)
 ):
     """Частично обновить данные пользователя."""
     existing_user = await get_user_by_id(db, user_id)
     if not existing_user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
     update_data = user.dict(exclude_unset=True)
@@ -144,21 +133,17 @@ async def update_user_partial(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error updating user: {str(e)}"
+            detail=f"Error updating user: {str(e)}",
         )
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(
-    user_id: UUID,
-    db: AsyncSession = Depends(get_db)
-):
+async def delete_user(user_id: UUID, db: AsyncSession = Depends(get_db)):
     """Удалить пользователя."""
     user = await get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
     try:
@@ -168,5 +153,5 @@ async def delete_user(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error deleting user: {str(e)}"
+            detail=f"Error deleting user: {str(e)}",
         )

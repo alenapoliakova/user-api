@@ -59,5 +59,5 @@ class UserFilter(BaseModel):
     patronymic: str | None = Field(None, max_length=64)
     type: constr(pattern="^(teacher|student|headteacher)$") | None = None
     class_name: str | None = Field(None, max_length=8)
-    email: EmailStr | None = None
+    login: str | None = Field(None, max_length=64)
     subject: str | None = Field(None, max_length=64)

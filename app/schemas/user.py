@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, constr
+from pydantic import BaseModel, ConfigDict, Field, constr
 
 
 class UserBase(BaseModel):
@@ -42,6 +42,6 @@ class UserUpdate(BaseModel):
     patronymic: str | None = Field(None, max_length=64)
     type: constr(pattern="^(teacher|student|headteacher)$") | None = None
     class_name: str | None = Field(None, max_length=8)
-    login: EmailStr | None = None
+    login: str | None = Field(None, max_length=64)
     password: str | None = Field(None, min_length=8)
     subject: str | None = Field(None, max_length=64)

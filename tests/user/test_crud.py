@@ -128,4 +128,27 @@ async def test_get_deleted_user(
 
     # Пытаемся получить удаленного пользователя
     response = await async_client.get(f"/api/v1/users/{user_id}")
-    assert response.status_code == status.HTTP_404_NOT_FOUND 
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.asyncio
+async def test_get_users(
+    async_client: AsyncClient,
+    users_data: list[dict[str, str]],
+    user_filter: dict[str, str]
+) -> None:
+    """Тест получения пользователей в соответствии с фильтром."""
+    # Создаем пользователей
+    for user_data in users_data:
+        create_response = await async_client.post("/api/v1/users", json=user_data)
+        assert create_response.status_code == status.HTTP_201_CREATED
+        data = create_response.json()
+
+    # Получаем пользователей
+    response = await async_client.get(f"/api/v1/users/user_filter") # # # # #
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    for data_user in data:
+        assert data_user["login"] == user_filter["login"]
+        assert "password" not in data_user
+        assert "password_hash" not in data_user

@@ -137,7 +137,7 @@ async def test_get_users(
     users_data: list[dict[str, str]],
     user_filter: dict[str, str]
 ) -> None:
-    """Тест получения пользователей в соответствии с фильтром."""
+    """Тост получения пользователей в соответствии с фильтром."""
     # Создаем пользователей
     for user_data in users_data:
         create_response = await async_client.post("/api/v1/users", json=user_data)

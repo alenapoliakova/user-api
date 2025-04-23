@@ -83,3 +83,18 @@ def users_data() -> list[dict[str, str]]:
             "subject": "Math"
         },
     ]
+
+@pytest.fixture
+def user_filter() -> dict[str, str]:
+    """
+    Базовые данные для создания пользователя.
+    """
+    return {
+        "name": None,
+        "surname": None,
+        "patronymic": None,
+        "type": "student",
+        "class_name": "10A",
+        "login": None,
+        "subject": None
+    }

@@ -157,13 +157,13 @@ async def delete_user(user_id: UUID, db: AsyncSession = Depends(get_db)):
         )
 
 
-@router.get("/user_filter", response_model=list[UserResponse])
+@router.post("/user_filter", response_model=list[UserResponse])
 async def get_users(
     user_filter: UserFilter,
     db: AsyncSession = Depends(get_db)
 ):
     filter_data = user_filter.dict(exclude_unset=True)
-    filters = [key == value for key, value in filter_data]
+    filters = [getattr(User, field) == value for field, value in filter_data.items()]
     result = await db.execute(select(User).filter(and_(*filters)))
     users = result.scalars().all()
     return users

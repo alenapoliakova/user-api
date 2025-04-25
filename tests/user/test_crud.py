@@ -131,7 +131,7 @@ async def test_get_deleted_user(
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio #
 async def test_get_users(
     async_client: AsyncClient,
     users_data: list[dict[str, str]],

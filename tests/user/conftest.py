@@ -84,7 +84,7 @@ def users_data() -> list[dict[str, str]]:
         },
     ]
 
-@pytest.fixture
+@pytest.fixture #
 def user_filter() -> dict[str, str]:
     """
     Базовые данные для создания пользователя.

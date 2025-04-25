@@ -2,12 +2,12 @@ from uuid import UUID
 
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.base import get_db
 from app.db.models import User
-from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.schemas.user import UserCreate, UserFilter, UserResponse, UserUpdate
 
 router = APIRouter()
 
@@ -155,3 +155,15 @@ async def delete_user(user_id: UUID, db: AsyncSession = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error deleting user: {str(e)}",
         )
+
+
+@router.post("/user_filter", response_model=list[UserResponse])
+async def get_users(
+    user_filter: UserFilter,
+    db: AsyncSession = Depends(get_db)
+):
+    filter_data = user_filter.dict(exclude_unset=True)
+    filters = [getattr(User, field) == value for field, value in filter_data.items()]
+    result = await db.execute(select(User).filter(and_(*filters)))
+    users = result.scalars().all()
+    return users

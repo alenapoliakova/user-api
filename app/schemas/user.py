@@ -45,3 +45,19 @@ class UserUpdate(BaseModel):
     login: str | None = Field(None, max_length=64)
     password: str | None = Field(None, min_length=8)
     subject: str | None = Field(None, max_length=64)
+
+
+class UserFilter(BaseModel):
+    model_config = ConfigDict(
+        strict=True,
+        str_to_lower=False,
+        validate_assignment=True,
+        extra='forbid'
+    )
+    name: str | None = Field(None, max_length=64)
+    surname: str | None = Field(None, max_length=64)
+    patronymic: str | None = Field(None, max_length=64)
+    type: constr(pattern="^(teacher|student|headteacher)$") | None = None
+    class_name: str | None = Field(None, max_length=8)
+    login: str | None = Field(None, max_length=64)
+    subject: str | None = Field(None, max_length=64)
